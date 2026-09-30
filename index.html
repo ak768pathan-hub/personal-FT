@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Finance Tracker</title>
+  
+  <!-- COMPLETE BUILT-IN BOOTSTRAP STYLING BACKUP (No internet needed) -->
+  <style>
+    body { font-family: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background-color: #f8f9fa; margin: 0; color: #212529; }
+    .navbar { background-color: #212529; padding: 1rem 0; color: #fff; margin-bottom: 1.5rem; }
+    .navbar-brand { font-size: 1.25rem; font-weight: bold; margin-left: 15px; }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 15px; box-sizing: border-box; }
+    .row { display: flex; flex-wrap: wrap; margin: 0 -12px; }
+    .col-md-4 { flex: 0 0 auto; width: 33.333%; padding: 0 12px; box-sizing: border-box; }
+    .col-lg-7 { flex: 0 0 auto; width: 58.333%; padding: 0 12px; box-sizing: border-box; }
+    .col-lg-5 { flex: 0 0 auto; width: 41.666%; padding: 0 12px; box-sizing: border-box; }
+    .card { background: #fff; border-radius: 8px; border: 0; box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); padding: 1.5rem; margin-bottom: 1.5rem; box-sizing: border-box; }
+    .text-center { text-align: center; }
+    .text-end { text-align: right; }
+    .text-muted { color: #6c757d; }
+    .small { font-size: 0.875em; }
+    .fw-bold { font-weight: 700; }
+    .fw-semibold { font-weight: 600; }
+    .text-primary { color: #0d6efd; }
+    .text-success { color: #198754; }
+    .text-danger { color: #dc3545; }
+    .my-2 { margin-top: .5rem; margin-bottom: .5rem; }
+    .mb-0 { margin-bottom: 0; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .d-flex { display: flex; }
+    .justify-content-between { justify-content: space-between; }
+    .align-items-center { align-items: center; }
+    .form-label { display: inline-block; margin-bottom: .5rem; }
+    .form-control, .form-select { display: block; width: 100%; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; color: #212529; background-color: #fff; border: 1px solid #ced4da; border-radius: .375rem; box-sizing: border-box; }
+    .btn { display: inline-block; font-weight: 600; text-align: center; vertical-align: middle; cursor: pointer; padding: .375rem .75rem; border: 1px solid transparent; border-radius: .375rem; background-color: #212529; color: #fff; text-decoration: none; }
+    .btn-outline-success { color: #198754; border-color: #198754; background: transparent; font-size: 0.875rem; padding: 0.25rem 0.5rem; }
+    .btn-outline-success:hover { color: #fff; background-color: #198754; }
+    .btn-outline-success:disabled { opacity: 0.5; cursor: not-allowed; }
+    .delete-btn-action { color: #dc3545; background: transparent; border: none; cursor: pointer; font-size: 1.1rem; }
+    .delete-btn-action:hover { transform: scale(1.15); color: #a71d2a; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: .75rem; text-align: left; border-bottom: 1px solid #dee2e6; }
+    th { background-color: #f8f9fa; font-weight: 600; }
+    .badge { display: inline-block; padding: .35em .65em; font-size: .75em; font-weight: 700; background-color: #e9ecef; color: #495057; border-radius: .375rem; }
+    .history-table-wrapper { max-height: 300px; overflow-y: auto; }
+    .chart-wrapper-box { position: relative; height: 280px; width: 100%; }
+    
+    @media (max-width: 992px) {
+      .col-lg-7, .col-lg-5, .col-md-4 { width: 100%; }
+      .col-md-6 { width: 100% !important; }
+    }
+  </style>
+
+  <!-- Live CDN Links (Will overlay seamlessly if online) -->
+  <link href="https://jsdelivr.net" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container">
+      <span class="navbar-brand mb-0 h1">📂 FinanceTracker</span>
+    </div>
+  </nav>
+
+  <div class="container mb-5">
+    <!-- Row 1: Summary Metric Tiles -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-center p-3">
+          <div class="text-muted small uppercase fw-bold">Total Balance</div>
+          <h2 class="text-primary my-2" id="total-balance">₹0.00</h2>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center p-3">
+          <div class="text-muted small uppercase fw-bold text-success">Total Income</div>
+          <h2 class="text-success my-2" id="total-income">₹0.00</h2>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center p-3">
+          <div class="text-muted small uppercase fw-bold text-danger">Total Expenses</div>
+          <h2 class="text-danger my-2" id="total-expense">₹0.00</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Content Split Grid -->
+    <div class="row">
+      <!-- Left Panel -->
+      <div class="col-lg-7">
+        
+        <!-- Input Form -->
+        <div class="card p-4 mb-4">
+          <h5 class="card-title mb-3 fw-bold">Add New Transaction</h5>
+          <form id="transaction-form">
+            <div class="row">
+              <div class="col-md-4" style="width: 50%; padding: 0 8px; box-sizing: border-box; margin-bottom: 12px;">
+                <label class="form-label small fw-semibold">Description</label>
+                <input type="text" id="desc" class="form-control" placeholder="e.g., Rent, Groceries" required>
+              </div>
+              <div class="col-md-4" style="width: 50%; padding: 0 8px; box-sizing: border-box; margin-bottom: 12px;">
+                <label class="form-label small fw-semibold">Amount (₹)</label>
+                <input type="number" id="amount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+              </div>
+              <div class="col-md-4" style="width: 50%; padding: 0 8px; box-sizing: border-box;">
+                <label class="form-label small fw-semibold">Type</label>
+                <select id="type" class="form-select" required>
+                  <option value="expense">Expense (-)</option>
+                  <option value="income">Income (+)</option>
+                </select>
+              </div>
+              <div class="col-md-4" style="width: 50%; padding: 0 8px; box-sizing: border-box;">
+                <label class="form-label small fw-semibold">Category</label>
+                <select id="category" class="form-select" required>
+                  <option value="Salary">Salary</option>
+                  <option value="Food">Food & Dining</option>
+                  <option value="Rent">Rent & Utilities</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
+              <div class="col-12 text-end" style="width: 100%; margin-top: 20px; padding: 0 8px;">
+                <button type="submit" class="btn px-4">Add Transaction</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Ledger Table Log -->
+        <div class="card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0 fw-bold">Transaction History</h5>
+            <button id="export-btn" class="btn btn-outline-success btn-sm">Export CSV</button>
+          </div>
+          <div class="history-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th style="text-align: right;">Amount</th>
+                  <th style="text-align: center;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="transaction-list">
+                <!-- Data rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Data Visualizer Box -->
+      <div class="col-lg-5">
+        <div class="card text-center h-100 p-4">
+          <h5 class="card-title mb-4 fw-bold text-start">Expense Breakdown</h5>
+          <div class="chart-wrapper-box">
+            <canvas id="expenseChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- External Visual Script Engines -->
+  <script src="https://jsdelivr.net"></script>
+  
+  <!-- Core Application Scripts Logic Connection -->
+  <script src="app.js"></script>
+</body>
+</html>
